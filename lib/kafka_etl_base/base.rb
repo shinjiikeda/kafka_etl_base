@@ -155,7 +155,7 @@ module KafkaETLBase
       zk.set(zk_part_node, "0")
     end
     
-    def process_messages(cons)
+    def process_messages(cons, part_no)
       messages = cons.fetch
       messages.each do |m|
         key = m.key
