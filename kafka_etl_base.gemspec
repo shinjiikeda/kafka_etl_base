@@ -5,7 +5,7 @@ require 'kafka_etl_base/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "kafka_etl_base"
-  spec.version       = KafkaEtlBase::VERSION
+  spec.version       = KafkaETLBase::VERSION
   spec.authors       = ["Shinji Ikeda"]
   spec.email         = ["gm.ikeda@gmail.com"]
   spec.summary       = %q{Kafa ETL Base}

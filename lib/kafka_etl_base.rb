@@ -1,5 +1,5 @@
 require "kafka_etl_base/version"
 
-module KafkaEtlBase
+module KafkaETLBase
   # Your code goes here...
 end
