@@ -10,7 +10,7 @@ module KafkaETLBase
     def initialize(zookeeper, kafka_brokers, kafka_topic, opts={})
       
       @num_threads = opts[:num_threads] ? opts[:num_threads] : 2 
-      @max_fetch_bytes = opts[:max_fetch_bytes] ? opts[:max_fetch_bytes] : 10_000_000
+      @max_fetch_bytes = opts[:max_fetch_bytes] ? opts[:max_fetch_bytes] : 5_000_000
       @min_fetch_bytes = opts[:min_fetch_bytes] ? opts[:min_fetch_bytes] : 0
       @kafka_clint_id = opts[:kafka_client_id] ? opts[:kafka_client_id] : "my_consumer"
       @kafka_part_num = opts[:kafka_topic_part_num] ? opts[:kafka_topic_part_num] : 2
@@ -148,8 +148,6 @@ module KafkaETLBase
       rescue BackendError
         $log.debug "backend error"
         return 0
-      rescue => e
-        raise e
       ensure
         cons.close if ! cons.nil?
       end
@@ -163,8 +161,9 @@ module KafkaETLBase
       messages.each do |m|
         key = m.key
         val = m.value
-        puts "key: #{key}, val: #{val}"
+        puts "part: #{part_no}, key: #{key}, val: #{val}"
       end
+      messages.size
     end
   end
 end
