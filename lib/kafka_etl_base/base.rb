@@ -24,6 +24,7 @@ module KafkaETLBase
       $log.debug("zookeeper: #{@zookeeper}")
       $log.debug("kafka_brokers: #{@kafka_brokers}")
       $log.debug("kafka_topic: #{@kafka_topic}")
+      $log.debug("kafka_client_id: #{@kafka_client_id}")
       
       @partition_shuffle = true
       
