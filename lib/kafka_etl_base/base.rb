@@ -12,7 +12,7 @@ module KafkaETLBase
       @num_threads = opts[:num_threads] ? opts[:num_threads] : 2 
       @max_fetch_bytes = opts[:max_fetch_bytes] ? opts[:max_fetch_bytes] : 5_000_000
       @min_fetch_bytes = opts[:min_fetch_bytes] ? opts[:min_fetch_bytes] : 0
-      @kafka_clint_id = opts[:kafka_client_id] ? opts[:kafka_client_id] : "my_consumer"
+      @kafka_client_id = opts[:kafka_client_id] ? opts[:kafka_client_id] : "my_consumer"
       @kafka_part_num = opts[:kafka_topic_part_num] ? opts[:kafka_topic_part_num] : 2
       
       @zookeeper = zookeeper
