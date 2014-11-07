@@ -53,7 +53,7 @@ module KafkaETLBase
                 remain = proccess_thread(zk, part_no)
                 break if remain < 1000
               else
-                $log.info("part: #{part_no} is aleady locked skip")
+                $log.info("part: #{part_no} is already locked skip")
                 break
               end
             ensure
@@ -78,7 +78,7 @@ module KafkaETLBase
                remain = proccess_thread(zk, part_no)
                break if remain < 1000
             else
-              $log.info("part: #{part_no} is aleady locked skip")
+              $log.info("part: #{part_no} is already locked skip")
               break
             end
           ensure
