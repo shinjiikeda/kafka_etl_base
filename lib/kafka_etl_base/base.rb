@@ -39,7 +39,13 @@ module KafkaETLBase
       
       zk = ZK.new(@zookeeper)
       zk.create("/", ignore: :node_exists)
-      
+     
+      if zk.exists?("/stop_etl")
+        $log.info("zk: /stop_etl exist.")
+        $log.info("stop message processing.")
+        return
+      end
+
       begin
         seq = [ * 0 ... @kafka_part_num ]
         seq.shuffle! if @partition_shuffle == true
