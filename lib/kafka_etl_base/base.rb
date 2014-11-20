@@ -158,9 +158,10 @@ module KafkaETLBase
       ensure
         cons.close if ! cons.nil?
       end
-    rescue Poseidon::Errors::OffsetOutOfRange => e
+    rescue Poseidon::Errors::UnableToFetchMetadata, Poseidon::Errors::OffsetOutOfRange => e
       $log.error e.to_s
       zk.set(zk_part_node, "0")
+      return 0
     end
     
     def process_messages(cons, part_no)
