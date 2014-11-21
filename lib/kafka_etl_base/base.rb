@@ -158,9 +158,12 @@ module KafkaETLBase
       ensure
         cons.close if ! cons.nil?
       end
-    rescue Poseidon::Errors::NotLeaderForPartition, Poseidon::Errors::UnableToFetchMetadata, Poseidon::Errors::OffsetOutOfRange => e
-      $log.error e.to_s
+    rescue Poseidon::Errors::OffsetOutOfRange => e
       zk.set(zk_part_node, "0")
+      $log.error e.to_s
+      return 0
+    rescue Poseidon::Errors::NotLeaderForPartition, Poseidon::Errors::UnableToFetchMetadata => e
+      $log.error e.to_s
       return 0
     end
     
