@@ -52,19 +52,15 @@ module KafkaETLBase
         
         r = Parallel.each(seq, :in_threads => @num_threads) do |part_no|
           zk_lock = "lock_hdfs_part_#{part_no}"
-          3.times.each do | n |
-            locker = zk.locker(zk_lock)
-            begin
-              if locker.lock!
-                remain = proccess_thread(zk, part_no)
-                break if remain < 1000
-              else
-                $log.info("part: #{part_no} is already locked skip")
-                break
-              end
-            ensure
-              locker.unlock!
+          locker = zk.locker(zk_lock)
+          begin
+            if locker.lock!
+              remain = proccess_thread(zk, part_no)
+            else
+              $log.info("part: #{part_no} is already locked skip")
             end
+          ensure
+            locker.unlock!
           end
         end
       ensure
@@ -74,25 +70,21 @@ module KafkaETLBase
     end
     
     def process_partition(part_no)
-      3.times.each do | n |
-        zk = ZK.new(@zookeeper)
+      zk = ZK.new(@zookeeper)
+      begin
+        zk_lock = "lock_hdfs_part_#{part_no}"
+        locker = zk.locker(zk_lock)
         begin
-           zk_lock = "lock_hdfs_part_#{part_no}"
-          locker = zk.locker(zk_lock)
-          begin
-            if locker.lock!
-               remain = proccess_thread(zk, part_no)
-               break if remain < 1000
-            else
-              $log.info("part: #{part_no} is already locked skip")
-              break
-            end
-          ensure
-            locker.unlock!
+          if locker.lock!
+            remain = proccess_thread(zk, part_no)
+          else
+            $log.info("part: #{part_no} is already locked skip")
           end
         ensure
-          zk.close
+          locker.unlock!
         end
+      ensure
+        zk.close
       end
     end
     
@@ -142,13 +134,6 @@ module KafkaETLBase
         # set next offset to zookeper
         zk.set(zk_part_node, next_offset.to_s) if next_offset >= offset
         return last_offset - next_offset
-      rescue Poseidon::Errors::NotLeaderForPartition => e
-        $log.error "Skip: Not Leader For Partition"
-        return 0
-      rescue Poseidon::Errors::OffsetOutOfRange => e
-        $log.error e.to_s
-        zk.set(zk_part_node, "0")
-        return 0
       rescue Poseidon::Connection::ConnectionFailedError
         $log.error "kafka connection failed"
         return 0
