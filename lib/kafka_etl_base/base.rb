@@ -53,14 +53,14 @@ module KafkaETLBase
       seq.shuffle! if @partition_shuffle == true
       
       r = Parallel.each(seq, :in_threads => @num_threads) do |part_no|
-        zk = nil
+        zk_th = nil
         begin
-          zk = ZK.new(@zookeeper)
+          zk_th = ZK.new(@zookeeper)
           zk_lock = "lock_hdfs_part_#{part_no}"
-          locker = zk.locker(zk_lock)
+          locker = zk_th.locker(zk_lock)
           begin
             if locker.lock!
-              remain = proccess_thread(zk, part_no)
+              remain = proccess_thread(zk_th, part_no)
             else
               $log.info("part: #{part_no} is already locked skip")
             end
@@ -69,7 +69,7 @@ module KafkaETLBase
               locker.unlock!
             rescue => e
               $log.error(e.inspect)
-              $Log.error(e.backtrace)
+              $log.error(e.backtrace)
             end
           end
         rescue ZK::Exceptions::ConnectionLoss => e
@@ -77,7 +77,7 @@ module KafkaETLBase
           $log.error(e.backtrace)
         ensure
           begin
-            zk.close if ! zk.nil?
+            zk_th.close if ! zk_th.nil?
           rescue
           end
         end
