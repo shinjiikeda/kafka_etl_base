@@ -60,13 +60,13 @@ module KafkaETLBase
               $log.info("part: #{part_no} is already locked skip")
             end
           rescue ZK::Exceptions::ConnectionLoss => e
-            $log.error(e.to_s)
+            $log.error(e.inspect)
             $log.error(e.backtrace)
           ensure
             begin
               locker.unlock!
             rescue => e
-              $log.error(e.to_s)
+              $log.error(e.inspect)
               $Log.error(e.backtrace)
             end
           end
@@ -153,10 +153,10 @@ module KafkaETLBase
       end
     rescue Poseidon::Errors::OffsetOutOfRange => e
       zk.set(zk_part_node, "0")
-      $log.error e.to_s
+      $log.error e.inspect
       return 0
     rescue Poseidon::Errors::NotLeaderForPartition, Poseidon::Errors::UnableToFetchMetadata => e
-      $log.error e.to_s
+      $log.error e.inspect
       return 0
     end
     
