@@ -38,19 +38,24 @@ module KafkaETLBase
       @total_procs = 0
       
       zk = ZK.new(@zookeeper)
-      zk.create("/", ignore: :node_exists)
-     
-      if zk.exists?("/stop_etl")
-        $log.info("zk: /stop_etl exist.")
-        $log.info("stop message processing.")
-        return
-      end
-
       begin
-        seq = [ * 0 ... @kafka_part_num ]
-        seq.shuffle! if @partition_shuffle == true
-        
-        r = Parallel.each(seq, :in_threads => @num_threads) do |part_no|
+        #zk.create("/", ignore: :node_exists)
+        if zk.exists?("/stop_etl")
+          $log.info("zk: /stop_etl exist.")
+          $log.info("stop message processing.")
+          return
+        end
+      ensure
+        zk.close
+      end
+      
+      seq = [ * 0 ... @kafka_part_num ]
+      seq.shuffle! if @partition_shuffle == true
+      
+      r = Parallel.each(seq, :in_threads => @num_threads) do |part_no|
+        zk = nil
+        begin
+          zk = ZK.new(@zookeeper)
           zk_lock = "lock_hdfs_part_#{part_no}"
           locker = zk.locker(zk_lock)
           begin
@@ -59,9 +64,6 @@ module KafkaETLBase
             else
               $log.info("part: #{part_no} is already locked skip")
             end
-          rescue ZK::Exceptions::ConnectionLoss => e
-            $log.error(e.inspect)
-            $log.error(e.backtrace)
           ensure
             begin
               locker.unlock!
@@ -70,9 +72,15 @@ module KafkaETLBase
               $Log.error(e.backtrace)
             end
           end
+        rescue ZK::Exceptions::ConnectionLoss => e
+          $log.error(e.inspect)
+          $log.error(e.backtrace)
+        ensure
+          begin
+            zk.close if ! zk.nil?
+          rescue
+          end
         end
-      ensure
-        zk.close
       end
       $log.info "total procs: #{@total_procs}"
     end
