@@ -46,7 +46,7 @@ module KafkaETLBase
           return
         end
       ensure
-        zk.close
+        zk.close!
       end
       
       seq = [ * 0 ... @kafka_part_num ]
@@ -77,7 +77,7 @@ module KafkaETLBase
           $log.error(e.backtrace)
         ensure
           begin
-            zk_th.close if ! zk_th.nil?
+            zk_th.close! if ! zk_th.nil?
           rescue
           end
         end
