@@ -59,8 +59,16 @@ module KafkaETLBase
             else
               $log.info("part: #{part_no} is already locked skip")
             end
+          rescue ZK::Exceptions::ConnectionLoss
+            $log.error(e.to_s)
+            $log.error(e.backtrace)
           ensure
-            locker.unlock!
+            begin
+              locker.unlock!
+            rescue
+              $log.error(e.to_s)
+              $Log.error(e.backtrace)
+            end
           end
         end
       ensure
