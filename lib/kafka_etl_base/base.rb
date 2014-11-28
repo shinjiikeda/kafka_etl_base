@@ -72,7 +72,7 @@ module KafkaETLBase
               $log.error(e.backtrace)
             end
           end
-        rescue ZK::Exceptions::ConnectionLoss => e
+        rescue Zookeeper::Exceptions::NotConnected,ZK::Exceptions::ConnectionLoss => e
           $log.error(e.inspect)
           $log.error(e.backtrace)
         ensure
